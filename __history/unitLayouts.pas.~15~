@@ -1,0 +1,25 @@
+unit unitLayouts;
+
+interface
+
+uses FMX.Forms, FMX.Objects, Math, System.Classes, System.Types, System.SysUtils;
+
+procedure ChooseLayout(var Form : TForm; var BG : TImage);
+
+implementation
+
+procedure ChooseLayout(var Form : TForm; var BG : TImage);
+Const
+  BGNUMBER = 7;
+var
+  LayoutID : Integer;
+  RStream : TResourceStream;
+begin
+//Choose a random layout out of those available and load it
+  LayoutID := Round(RandomRange(1, BGNUMBER));
+  RStream := TResourceStream.Create(MainInstance, 'BG' + IntToStr(LayoutID), RT_RCData);
+  BG.MultiResBitmap.LoadItemFromStream(RStream);
+  RStream.Free;
+end;
+
+end.
