@@ -21,29 +21,33 @@ type
     procedure btnPlayClick(Sender: TObject);
     procedure LogAdd(Entry: String);
     procedure LogModify(Entry: String);
+    procedure OnActiveBG(Sender : TObject);
   private
     { Private declarations }
   public
     { Public declarations }
   end;
 
+  TSettings = record
+    Username : String[20];
+    Xms, Xmx : integer;
+  end;
+
 var
   frmMain: TfrmMain;
   MinecraftDir: String;
+  Settings : TSettings;
 
 implementation
 
 {$R *.fmx}
-{$IFDEF MACOS}
 
-uses unitLayouts;
+uses unitLayouts, unitSettings, unitMacOS, unitWindows, SHLObj;
 
-
-{$ELSE}
-
-uses unitLayouts, SHLObj;
-
-{$ENDIF}
+procedure TFrmMain.OnActiveBG(Sender : TObject);
+begin
+  ChooseLayout(frmMain, imgBG);
+end;
 
 Procedure TfrmMain.LogModify(Entry: string);
 begin
@@ -63,7 +67,10 @@ end;
 
 procedure TfrmMain.FormActivate(Sender: TObject);
 begin
-  OnActivate := Nil;
+  LogAdd('Setting Minecraft directory to ' + SetMinecraftDir);
+  LogAdd('Minecraft directory ' + CheckCreateDir(MinecraftDir));
+  LogAdd('Settings ' + LoadSettings);
+  OnActivate := OnActiveBG;
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
@@ -72,5 +79,6 @@ begin
   // Chooses random image
   LogAdd('Layout ' + ChooseLayout(frmMain, imgBG) + ' chosen');
 end;
+
 
 end.
