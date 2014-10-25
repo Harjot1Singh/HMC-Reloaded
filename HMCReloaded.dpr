@@ -6,7 +6,12 @@ uses
   FMX.Forms,
   FMX.Types,
   unitMain in 'unitMain.pas' {frmMain},
-  unitLayouts in 'unitLayouts.pas';
+  unitLayouts in 'unitLayouts.pas',
+  unitSettings in 'unitSettings.pas',
+  unitMacOS in 'unitMacOS.pas',
+  unitWindows in 'unitWindows.pas',
+  unitLaunchCmd in 'unitLaunchCmd.pas',
+  unitUpdates in 'unitUpdates.pas';
 
 {$R *.res}
 

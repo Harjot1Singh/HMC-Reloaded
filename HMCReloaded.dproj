@@ -100,6 +100,11 @@
             <Form>frmMain</Form>
         </DCCReference>
         <DCCReference Include="unitLayouts.pas"/>
+        <DCCReference Include="unitSettings.pas"/>
+        <DCCReference Include="unitMacOS.pas"/>
+        <DCCReference Include="unitWindows.pas"/>
+        <DCCReference Include="unitLaunchCmd.pas"/>
+        <DCCReference Include="unitUpdates.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

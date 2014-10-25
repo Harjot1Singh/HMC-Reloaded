@@ -1,14 +1,25 @@
-{$IFDEF MSWINDOWS}
 unit unitWindows;
 
-interface
+//Windows Specific
 
-uses SHLObj, SysUtils;
+interface
+{$IFDEF MSWINDOWS}
+uses SHLObj, SysUtils, fmx.dialogs;
 
 function setMinecraftDir(var MinecraftDir : String):String;
 function checkCreateDir(Dir : String):String;
+function javaFound():string;
 
+{$ENDIF}
 implementation
+{$IFDEF MSWINDOWS}
+
+function javaFound():String;
+var
+  JavaPath : String;
+begin
+  showmessage(GetEnvironmentVariable('ProgramFiles'));
+end;
 
 function AppDataPath : string;
 const
@@ -32,7 +43,7 @@ function checkCreateDir(Dir : string):string;
 begin
   if ForceDirectories(Dir) then result := 'found' else result := 'failed';
 end;
-
+{$ENDIF}
 end.
 
-{$ENDIF}
+
