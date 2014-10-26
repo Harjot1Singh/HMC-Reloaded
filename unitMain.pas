@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants,
+  System.Variants, unitLogger, unitUpdates,
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
   FMX.Objects, FMX.Edit, FMX.ListView.Types, FMX.ListView, FMX.Layouts,
   FMX.ListBox, FMX.Memo, FMX.Ani, System.Rtti, FMX.Grid, IdBaseComponent,
@@ -16,7 +16,6 @@ type
     StyleBook: TStyleBook;
     edtName: TClearingEdit;
     btnPlay: TButton;
-    lvMemo: TMemo;
     sbtnSettings: TSpeedButton;
     plSettings: TPanel;
     tbXms: TTrackBar;
@@ -29,11 +28,13 @@ type
     gdDownloads: TGrid;
     progressColumn: TProgressColumn;
     stringColumn: TStringColumn;
+    gdLog: TGrid;
+    sgLog: TStringColumn;
+    plLog: TPanel;
+    sbtnLog: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure btnPlayClick(Sender: TObject);
-    procedure LogAdd(Entry: String);
-    procedure LogModify(Entry: String);
     procedure OnActiveBG(Sender : TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure sbtnSettingsClick(Sender: TObject);
@@ -43,12 +44,12 @@ type
     procedure btnSyncModsClick(Sender: TObject);
     procedure btnForceUpdateClick(Sender: TObject);
     procedure edtNameChange(Sender: TObject);
-    procedure gdDownloadsGetValue(Sender: TObject; const Col, Row: Integer;
-      var Value: TValue);
+    procedure sbtnLogClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     { Private declarations }
   public
-    { Public declarations }
+     Logger : TLogger;
   end;
 
   TSettings = record
@@ -72,19 +73,6 @@ begin
   ChooseLayout(frmMain, imgBG);
 end;
 
-procedure TfrmMain.sbtnSettingsClick(Sender: TObject);
-begin
-  if sbtnSettings.StyleLookup = 'stepperbuttonleft' then
-  begin
-    plSettings.AnimateFloat('position.x', imgBG.Width - plSettings.Width, 1.5, TAnimationType.atOut, TInterpolationType.itElastic);
-    sbtnSettings.StyleLookup := 'stepperbuttonright';
-  end else
-  begin
-    plSettings.AnimateFloat('position.x', imgBG.Width , 1.5, TAnimationType.atOut, TInterpolationType.itBounce);
-    sbtnSettings.StyleLookup := 'stepperbuttonleft'
-  end;
-end;
-
 procedure TfrmMain.tbXmsTracking(Sender: TObject);
 begin
   lblXms.Text := 'Starting RAM (-Xms) - ' + IntToStr(Round(tbXms.Value)) + 'MB';
@@ -97,16 +85,6 @@ begin
   Settings.Xmx := Round(tbXmx.Value);
 end;
 
-Procedure TfrmMain.LogModify(Entry: string);
-begin
-  lvMemo.Lines[lvMemo.Lines.Count] := Entry;
-end;
-
-Procedure TfrmMain.LogAdd(Entry: String);
-begin
-  lvMemo.Lines.Add(Entry);
-  lvMemo.GoToTextEnd;
-end;
 
 procedure TfrmMain.btnDefaultXmClick(Sender: TObject);
 begin
@@ -120,8 +98,13 @@ begin
 end;
 
 procedure TfrmMain.btnPlayClick(Sender: TObject);
+var
+  D : TDownloader;
 begin
-  LogAdd('Layout ' + ChooseLayout(frmMain, imgBG) + ' chosen');
+  D := TDownloader.Create;
+  D.URL := 'http://dl.dropboxusercontent.com/u/43879036/Minecraft/GenModList.exe';
+  D.Path := MinecraftDir + '\da.html';
+  D.Start;
 end;
 
 procedure TfrmMain.btnSyncModsClick(Sender: TObject);
@@ -136,32 +119,44 @@ begin
 end;
 
 procedure TfrmMain.FormActivate(Sender: TObject);
+var
+  Java : String;
 begin
-  LogAdd('Setting Minecraft directory to ' + SetMinecraftDir(MinecraftDir));
-  LogAdd('Minecraft directory ' + CheckCreateDir(MinecraftDir));
-  LogAdd('Settings ' + LoadSettings);
-  LogAdd('Java ' + JavaFound);
+  Logger.Add('Setting Minecraft directory to ' + SetMinecraftDir(MinecraftDir));
+  Logger.Add('Minecraft directory ' + CheckCreateDir(MinecraftDir));
+  Logger.Add('Settings ' + LoadSettings);
+  Java := JavaFound;
+  Logger.Add('Java ' + Java);
+  if not (Java = 'found') then btnPlay.Enabled := False;
   OnActivate := OnActiveBG;
 end;
 
 procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  SaveSettings();
+  SaveSettings;
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
-  LogAdd('Initialising Application...');
-  // Chooses random image
-  LogAdd('Layout ' + ChooseLayout(frmMain, imgBG) + ' chosen');
+  Logger := TLogger.Create(gdLog);
+  Logger.Add('Initialising Application...');
+  Logger.Add('Layout ' + ChooseLayout(frmMain, imgBG) + ' chosen');
 end;
 
-
-procedure TfrmMain.gdDownloadsGetValue(Sender: TObject; const Col, Row: Integer;
-  var Value: TValue);
+procedure TfrmMain.FormResize(Sender: TObject);
 begin
-  if col = 1 then Value := TValue.From<single>(Row);
+  gdDownloads.Columns[0].Width := frmMain.Width div 2;
+  gdDownloads.Columns[1].Width := frmMain.Width div 2;
+end;
 
+procedure TfrmMain.sbtnLogClick(Sender: TObject);
+begin
+  ToggleLogView;
+end;
+
+procedure TfrmMain.sbtnSettingsClick(Sender: TObject);
+begin
+  ToggleSettingsView;
 end;
 
 end.
