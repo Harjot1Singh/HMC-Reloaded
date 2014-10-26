@@ -5,7 +5,7 @@ unit unitUpdates;
 interface
 
 uses System.Classes, FMX.Grid, FMX.Ani, idHTTP, idComponent, SysUtils,
-  System.Rtti, idSSLOpenSSL, idTCPClient;
+  System.Rtti, idSSLOpenSSL, idTCPClient, XSuperObject, idHashMessageDigest, system.IOUtils, system.Types;
 
 type
 
@@ -15,27 +15,31 @@ type
     Path: String;
     Percent: Single;
     procedure Download;
-    Constructor Create(Sender : TObject);
+    Constructor Create(Sender: TObject);
     Destructor Destroy;
   protected
     procedure Execute; override;
   private
     Worker: TidHTTP;
-    Parent : TObject;
+    Parent: TObject;
     procedure onWork(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
     procedure UpdateUI;
   End;
 
   TUpdateManager = Class
   public
-    Grid : TGrid;
+    Grid: TGrid;
+    Info : ISuperObject;
     Constructor Create(var SGrid: TGrid);
     Destructor Destroy;
     function InternetConnected: Boolean;
-    procedure Update;
+    procedure Update(Sender: TObject);
     procedure ProgramUpdate;
     procedure FilesUpdate;
     procedure AddDownload(DURL, DPath: String);
+    procedure CheckUpdates;
+    procedure GenerateInfo;
+    procedure SaveInfo(Path : String);
     procedure Refresh;
   private
     Workers: Array of TDownloader;
@@ -47,6 +51,21 @@ implementation
 
 uses unitMain;
 
+function MD5(const FileName: string): string;
+var
+  IdMD5: TIdHashMessageDigest5;
+  FS: TFileStream;
+begin
+ IdMD5 := TIdHashMessageDigest5.Create;
+ FS := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+ try
+   Result := IdMD5.HashStreamAsHex(FS)
+ finally
+   FS.Free;
+   IdMD5.Free;
+ end;
+end;
+
 function TUpdateManager.InternetConnected: Boolean;
 var
   Client: TidTCPClient;
@@ -56,20 +75,26 @@ begin
   Client.Port := 80;
   try
     Client.Connect;
-    Result := True;
+    result := True;
     Client.Disconnect;
   Except
-    On E:Exception do
-      Result := False
+    On E: Exception do
+      result := False
   end;
   Client.Free;
+end;
+
+Procedure TUpdateManager.SaveInfo(Path : String);
+begin
+  Info.SaveTo(Path);
 end;
 
 procedure TUpdateManager.GetValue(Sender: TObject; const Col, Row: Integer;
   var Value: TValue);
 begin
   if Col = 0 then
-    Value := TValue.From<string>('(' + IntToStr(Row + 1) + '/' + IntToStr(Grid.RowCount) + ') '  + Workers[Row].URL)
+    Value := TValue.From<string>('(' + IntToStr(Row + 1) + '/' +
+      IntToStr(Grid.RowCount) + ') ' + Workers[Row].URL)
   else if Col = 1 then
     Value := TValue.From<Single>(Workers[Row].Percent);
 end;
@@ -97,13 +122,38 @@ begin
   //
 end;
 
-procedure TUpdateManager.Update;
+procedure TUpdateManager.Update(Sender: TObject);
 begin
-  AddDownload('https://dl.dropboxusercontent.com/u/43879036/Minecraft/MCLauncher.exe', MinecraftDir + '\tst1.test');
-  AddDownload('https://dl.dropboxusercontent.com/u/43879036/Minecraft/GenModList.exe', MinecraftDir + '\tst2.test');
+  GenerateInfo;
+  ProgramUpdate;
+  FilesUpdate;
 end;
 
-Constructor TDownloader.Create(Sender : TObject);
+procedure TUpdateManager.CheckUpdates;
+begin
+  AddDownload
+    ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
+    MinecraftDir + '\HMC.json');
+  Workers[0].OnTerminate := Update;
+end;
+
+procedure TUpdateManager.GenerateInfo;
+var
+  Files : TStringDynArray;
+  i:integer;
+  JFiles : ISuperObject;
+begin
+  JFiles := SO;
+  Info.S['launcherMD5'] := MD5(ParamStr(0));
+  Files := TDirectory.GetFiles(MinecraftDir, '*' ,TSearchOption.soAllDirectories);
+  for I := Low(Files) + 1 to High(Files) do    //Trying to skip including .settings file
+  begin
+    JFiles.S[Copy(Files[i], pos('HMC\', Files[i]) + 4, Length(Files[i]))] := MD5(Files[i]);
+  end;
+  Info.O['files'] := JFiles;
+end;
+
+Constructor TDownloader.Create(Sender: TObject);
 begin
   inherited Create(True);
   Parent := Sender;
@@ -114,7 +164,6 @@ end;
 
 Destructor TDownloader.Destroy;
 begin
-  Worker.Free;
   Inherited Destroy;
 end;
 
@@ -131,10 +180,11 @@ begin
       Worker.Get(URL, MS);
       MS.SaveToFile(Path);
     finally
+      Worker.Free;
       MS.Free;
     end;
   finally
-    Destroy;
+    Terminate;
   end;
 end;
 
@@ -147,11 +197,12 @@ Constructor TUpdateManager.Create(var SGrid: TGrid);
 begin
   SGrid.OnGetValue := GetValue;
   Grid := SGrid;
+  Info := SO;
 end;
 
 Destructor TUpdateManager.Destroy;
 begin
-  inherited Destroy;
+  //
 end;
 
 procedure TUpdateManager.Refresh;
@@ -165,16 +216,13 @@ var
   Worker: TidHTTP;
   ContentLength: Int64;
 begin
-  if not Terminated then
+  Worker := TidHTTP(ASender);
+  ContentLength := Worker.Response.ContentLength;
+  if (Pos('chunked', LowerCase(Worker.Response.TransferEncoding)) = 0) and
+    (ContentLength > 0) then
   begin
-    Worker := TidHTTP(ASender);
-    ContentLength := Worker.Response.ContentLength;
-    if (Pos('chunked', LowerCase(Worker.Response.TransferEncoding)) = 0) and
-      (ContentLength > 0) then
-    begin
-      Percent := 100 * AWorkCount / ContentLength;
-      Synchronize(UpdateUI);
-    end;
+    Percent := 100 * AWorkCount / ContentLength;
+    Synchronize(UpdateUI);
   end;
 end;
 

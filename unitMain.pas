@@ -55,7 +55,7 @@ type
 
   TSettings = record
     Username : String[20];
-    Xms, Xmx : integer;
+    Xms, Xmx, Version : integer;
   end;
 
 var
@@ -105,7 +105,7 @@ end;
 
 procedure TfrmMain.btnSyncModsClick(Sender: TObject);
 begin
-  //Sync mods etc
+  Updater.SaveInfo(MinecraftDir + '\HMC.json');
 end;
 
 procedure TfrmMain.edtNameChange(Sender: TObject);
@@ -121,10 +121,11 @@ begin
   Logger.Add('Setting Minecraft directory to ' + SetMinecraftDir(MinecraftDir));
   Logger.Add('Minecraft directory ' + CheckCreateDir(MinecraftDir));
   Logger.Add('Settings ' + LoadSettings);
+  SetGridWidth;
   Java := JavaFound;
   Logger.Add('Java ' + Java);
   if not (Java = 'found') then btnPlay.Enabled := False;
-  if Updater.InternetConnected then Updater.Update;
+  if Updater.InternetConnected then Updater.CheckUpdates else Logger.Add('Internet Connection not detected');
   OnActivate := OnActiveBG;
 end;
 
@@ -143,8 +144,7 @@ end;
 
 procedure TfrmMain.FormResize(Sender: TObject);
 begin
-  gdDownloads.Columns[0].Width := frmMain.Width div 2;
-  gdDownloads.Columns[1].Width := frmMain.Width div 2;
+  SetGridWidth;
 end;
 
 procedure TfrmMain.sbtnLogClick(Sender: TObject);

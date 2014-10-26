@@ -11,7 +11,8 @@ uses
   unitMacOS in 'unitMacOS.pas',
   unitWindows in 'unitWindows.pas',
   unitLaunchCmd in 'unitLaunchCmd.pas',
-  unitUpdates in 'unitUpdates.pas';
+  unitUpdates in 'unitUpdates.pas',
+  unitLogger in 'unitLogger.pas';
 
 {$R *.res}
 

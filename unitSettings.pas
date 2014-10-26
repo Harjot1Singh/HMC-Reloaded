@@ -31,22 +31,23 @@ function LoadSettings() : String;
 var
   SettingsFile : File of TSettings;
 begin
-  if FileExists(MinecraftDir + '\.settings') then
-  begin
     AssignFile(SettingsFile, MinecraftDir + '\.settings');
     Reset(SettingsFile);
-    Read(SettingsFile, Settings);
-    CloseFile(SettingsFile);
-    Result := 'loaded';
-  end else
-  begin
-    frmMain.btnDefaultXmClick(frmMain);
-    SaveSettings;
-    Result := 'created';
+    try
+      Read(SettingsFile, Settings);
+      CloseFile(SettingsFile);
+      Result := 'loaded';
+    Except On E:Exception do
+    begin
+        frmMain.btnDefaultXmClick(frmMain);
+        SaveSettings;
+        Result := 'created';
+    end;
   end;
   frmMain.tbXms.Value := Settings.Xms;
   frmMain.tbXmx.Value := Settings.Xmx;
   frmMain.edtName.Text := Settings.Username;
 end;
+
 
 end.

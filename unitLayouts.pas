@@ -7,9 +7,16 @@ uses FMX.Forms, FMX.Objects, Math, System.Classes, System.Types, System.SysUtils
 function ChooseLayout(Form : TForm; BG : TImage):String;
 procedure ToggleLogView;
 procedure ToggleSettingsView;
+procedure SetGridWidth;
 
 
 implementation
+
+procedure SetGridWidth;
+begin
+  frmMain.gdDownloads.Columns[0].Width := (frmMain.Width -16) div 2;
+  frmMain.gdDownloads.Columns[1].Width := (frmMain.Width -16) div 2;
+end;
 
 function ChooseLayout(Form : TForm; BG : TImage):String;
 Const

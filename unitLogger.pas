@@ -27,7 +27,7 @@ implementation
 Constructor TLogger.Create(var SGrid: TGrid);
 begin
   Grid := SGrid;
-  Grid.Columns[0].Width := Grid.Width - 10;
+  Grid.Columns[0].Width := Grid.Width - 20;
   Grid.OnGetValue := GetValue;
 end;
 
@@ -38,10 +38,7 @@ end;
 
 Procedure TLogger.GetValue(Sender: TObject; const Col: Integer; const Row: Integer; var Value: TValue);
 begin
-  if Col = 0 then
-    begin
-      Value := TValue.From<String>(Log[Row]);
-    end;
+  if Col = 0 then Value := TValue.From<String>(Log[Row]);
 end;
 
 Procedure TLogger.Add(Item: string);
