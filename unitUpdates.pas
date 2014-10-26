@@ -5,7 +5,7 @@ unit unitUpdates;
 interface
 
 uses System.Classes, FMX.Grid, FMX.Ani, idHTTP, idComponent, SysUtils,
-  System.Rtti, idSSLOpenSSL;
+  System.Rtti, idSSLOpenSSL, idTCPClient;
 
 type
 
@@ -13,22 +13,30 @@ type
   public
     URL: String;
     Path: String;
-    Percent: single;
+    Percent: Single;
     procedure Download;
-    Constructor Create;
+    Constructor Create(Sender : TObject);
     Destructor Destroy;
   protected
     procedure Execute; override;
   private
     Worker: TidHTTP;
+    Parent : TObject;
     procedure onWork(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
     procedure UpdateUI;
   End;
 
   TUpdateManager = Class
   public
-    Constructor Create(var Grid: TGrid);
+    Grid : TGrid;
+    Constructor Create(var SGrid: TGrid);
     Destructor Destroy;
+    function InternetConnected: Boolean;
+    procedure Update;
+    procedure ProgramUpdate;
+    procedure FilesUpdate;
+    procedure AddDownload(DURL, DPath: String);
+    procedure Refresh;
   private
     Workers: Array of TDownloader;
     procedure GetValue(Sender: TObject; const Col, Row: Integer;
@@ -39,9 +47,66 @@ implementation
 
 uses unitMain;
 
-Constructor TDownloader.Create;
+function TUpdateManager.InternetConnected: Boolean;
+var
+  Client: TidTCPClient;
+begin
+  Client := TidTCPClient.Create(nil);
+  Client.Host := 'google.com';
+  Client.Port := 80;
+  try
+    Client.Connect;
+    Result := True;
+    Client.Disconnect;
+  Except
+    On E:Exception do
+      Result := False
+  end;
+  Client.Free;
+end;
+
+procedure TUpdateManager.GetValue(Sender: TObject; const Col, Row: Integer;
+  var Value: TValue);
+begin
+  if Col = 0 then
+    Value := TValue.From<string>('(' + IntToStr(Row + 1) + '/' + IntToStr(Grid.RowCount) + ') '  + Workers[Row].URL)
+  else if Col = 1 then
+    Value := TValue.From<Single>(Workers[Row].Percent);
+end;
+
+procedure TUpdateManager.AddDownload(DURL: string; DPath: string);
+begin
+  SetLength(Workers, Length(Workers) + 1);
+  Grid.RowCount := Length(Workers);
+  Workers[High(Workers)] := TDownloader.Create(Self);
+  With Workers[High(Workers)] do
+  begin
+    URL := DURL;
+    Path := DPath;
+    Start;
+  end;
+end;
+
+procedure TUpdateManager.ProgramUpdate;
+begin
+  //
+end;
+
+procedure TUpdateManager.FilesUpdate;
+begin
+  //
+end;
+
+procedure TUpdateManager.Update;
+begin
+  AddDownload('https://dl.dropboxusercontent.com/u/43879036/Minecraft/MCLauncher.exe', MinecraftDir + '\tst1.test');
+  AddDownload('https://dl.dropboxusercontent.com/u/43879036/Minecraft/GenModList.exe', MinecraftDir + '\tst2.test');
+end;
+
+Constructor TDownloader.Create(Sender : TObject);
 begin
   inherited Create(True);
+  Parent := Sender;
   Worker := TidHTTP.Create(nil);
   Worker.onWork := onWork;
   Worker.HandleRedirects := True;
@@ -75,18 +140,23 @@ end;
 
 procedure TDownloader.Execute;
 begin
-  inherited;
   Download;
 end;
 
-Constructor TUpdateManager.Create(var Grid: TGrid);
+Constructor TUpdateManager.Create(var SGrid: TGrid);
 begin
-  Grid.OnGetValue := GetValue;
+  SGrid.OnGetValue := GetValue;
+  Grid := SGrid;
 end;
 
 Destructor TUpdateManager.Destroy;
 begin
-  //
+  inherited Destroy;
+end;
+
+procedure TUpdateManager.Refresh;
+begin
+  Grid.UpdateColumns;
 end;
 
 procedure TDownloader.onWork(ASender: TObject; AWorkMode: TWorkMode;
@@ -95,7 +165,7 @@ var
   Worker: TidHTTP;
   ContentLength: Int64;
 begin
-  while not Terminated do
+  if not Terminated then
   begin
     Worker := TidHTTP(ASender);
     ContentLength := Worker.Response.ContentLength;
@@ -110,15 +180,7 @@ end;
 
 procedure TDownloader.UpdateUI;
 begin
-  frmMain.LogAdd(FloatToStr(Percent));
-end;
-
-procedure TUpdateManager.GetValue(Sender: TObject; const Col, Row: Integer;
-  var Value: TValue);
-begin
-  if Col = 0 then // item
-  else if Col = 1 then // percent
-
+  (Parent as TUpdateManager).Refresh;
 end;
 
 end.

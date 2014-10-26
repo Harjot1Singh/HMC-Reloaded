@@ -50,6 +50,7 @@ type
     { Private declarations }
   public
      Logger : TLogger;
+     Updater : TUpdateManager;
   end;
 
   TSettings = record
@@ -98,13 +99,8 @@ begin
 end;
 
 procedure TfrmMain.btnPlayClick(Sender: TObject);
-var
-  D : TDownloader;
 begin
-  D := TDownloader.Create;
-  D.URL := 'http://dl.dropboxusercontent.com/u/43879036/Minecraft/GenModList.exe';
-  D.Path := MinecraftDir + '\da.html';
-  D.Start;
+  //
 end;
 
 procedure TfrmMain.btnSyncModsClick(Sender: TObject);
@@ -128,6 +124,7 @@ begin
   Java := JavaFound;
   Logger.Add('Java ' + Java);
   if not (Java = 'found') then btnPlay.Enabled := False;
+  if Updater.InternetConnected then Updater.Update;
   OnActivate := OnActiveBG;
 end;
 
@@ -139,6 +136,7 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   Logger := TLogger.Create(gdLog);
+  Updater := TUpdateManager.Create(gdDownloads);
   Logger.Add('Initialising Application...');
   Logger.Add('Layout ' + ChooseLayout(frmMain, imgBG) + ' chosen');
 end;
