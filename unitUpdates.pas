@@ -26,10 +26,15 @@ type
     procedure UpdateUI;
   End;
 
+
   TUpdateManager = Class
   public
     Grid: TGrid;
     Info : ISuperObject;
+    MaxWorkers : Integer;
+    CurrentDownloads : Integer;
+    NextDownload : Integer;
+    Queued : Array of Boolean;
     Constructor Create(var SGrid: TGrid);
     Destructor Destroy;
     function InternetConnected: Boolean;
@@ -40,7 +45,9 @@ type
     procedure CheckUpdates;
     procedure GenerateInfo;
     procedure SaveInfo(Path : String);
+    procedure onTermination(Sender : TObject);
     procedure Refresh;
+    procedure ProcessQueue;
   private
     Workers: Array of TDownloader;
     procedure GetValue(Sender: TObject; const Col, Row: Integer;
@@ -99,17 +106,41 @@ begin
     Value := TValue.From<Single>(Workers[Row].Percent);
 end;
 
+procedure TUpdateManager.ProcessQueue;
+var
+  i : integer;
+begin
+  if CurrentDownloads < MaxWorkers then
+   for i := 1 to MaxWorkers - CurrentDownloads do
+      if not Queued[High(Queued)] then
+      begin
+        Workers[NextDownload].Start;
+        Queued[NextDownload] := True;
+        Inc(CurrentDownloads);
+        Inc(NextDownload);
+      end;
+end;
+
 procedure TUpdateManager.AddDownload(DURL: string; DPath: string);
 begin
   SetLength(Workers, Length(Workers) + 1);
-  Grid.RowCount := Length(Workers);
+  SetLength(Queued, Length(Workers));
   Workers[High(Workers)] := TDownloader.Create(Self);
+  Grid.RowCount := Length(Workers);
   With Workers[High(Workers)] do
   begin
     URL := DURL;
     Path := DPath;
-    Start;
+    OnTerminate := OnTermination;
+    ProcessQueue;
   end;
+end;
+
+procedure TUpdateManager.onTermination(Sender: TObject);
+begin
+  if NextDownload mod MaxWorkers = 0 then Grid.TopRow := Grid.TopRow + 1 else Grid.TopRow := Grid.TopRow + MaxWorkers;
+  Dec(CurrentDownloads);
+  ProcessQueue;
 end;
 
 procedure TUpdateManager.ProgramUpdate;
@@ -124,18 +155,45 @@ end;
 
 procedure TUpdateManager.Update(Sender: TObject);
 begin
+  CurrentDownloads := 0;
   GenerateInfo;
+    AddDownload
+    ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
+    MinecraftDir + '\HMC1.json');
+      AddDownload
+    ('https://dl.dropboxusercontent.com/u/43879036/Music/dynamite.mp3',
+    MinecraftDir + '\dyn.mp3');
+      AddDownload
+    ('https://dl.dropboxusercontent.com/u/43879036/Music/dynamite.mp3',
+    MinecraftDir + '\dy.mp3');
+        AddDownload
+    ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
+    MinecraftDir + '\HMC1.json');
   ProgramUpdate;
   FilesUpdate;
 end;
 
 procedure TUpdateManager.CheckUpdates;
 begin
+  Grid.RowCount := 0;
+  CurrentDownloads := 0;
+  SetLength(Workers, 0);
   AddDownload
     ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
     MinecraftDir + '\HMC.json');
   Workers[0].OnTerminate := Update;
 end;
+
+Constructor TUpdateManager.Create(var SGrid: TGrid);
+var
+  i : integer;
+begin
+  SGrid.OnGetValue := GetValue;
+  Grid := SGrid;
+  Info := SO;
+  MaxWorkers := 2;
+end;
+
 
 procedure TUpdateManager.GenerateInfo;
 var
@@ -152,6 +210,7 @@ begin
   end;
   Info.O['files'] := JFiles;
 end;
+
 
 Constructor TDownloader.Create(Sender: TObject);
 begin
@@ -173,6 +232,7 @@ var
   SSL: TIdSSLIOHandlerSocketOpenSSL;
 begin
   try
+    Worker := Worker.Create(nil);
     MS := TMemoryStream.Create;
     SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
     try
@@ -193,12 +253,6 @@ begin
   Download;
 end;
 
-Constructor TUpdateManager.Create(var SGrid: TGrid);
-begin
-  SGrid.OnGetValue := GetValue;
-  Grid := SGrid;
-  Info := SO;
-end;
 
 Destructor TUpdateManager.Destroy;
 begin
