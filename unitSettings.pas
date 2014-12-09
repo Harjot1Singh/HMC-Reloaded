@@ -2,10 +2,10 @@ unit unitSettings;
 
 interface
 
-uses unitMain, SysUtils;
+uses unitMain, SysUtils, unitLogger;
 
-function SaveSettings() : String;
-function LoadSettings() : String;
+procedure SaveSettings();
+procedure LoadSettings();
 procedure UnlockAdmin;
 
 implementation
@@ -17,7 +17,7 @@ begin
   frmMain.btnSyncMods.Visible := True;
 end;
 
-function SaveSettings() : String;
+procedure SaveSettings();
 var
   SettingsFile : File of TSettings;
 begin
@@ -25,23 +25,24 @@ begin
   Rewrite(SettingsFile);
   Write(SettingsFile, Settings);
   CloseFile(SettingsFile);
+  Logger.Add('Settings saved at ' + MinecraftDir + '\.settings');
 end;
 
-function LoadSettings() : String;
+procedure LoadSettings();
 var
   SettingsFile : File of TSettings;
 begin
     AssignFile(SettingsFile, MinecraftDir + '\.settings');
-    Reset(SettingsFile);
     try
+      Reset(SettingsFile);
       Read(SettingsFile, Settings);
       CloseFile(SettingsFile);
-      Result := 'loaded';
+      Logger.Add('Settings File loaded from ' + MinecraftDir + '\.settings');
     Except On E:Exception do
     begin
-        frmMain.btnDefaultXmClick(frmMain);
         SaveSettings;
-        Result := 'created';
+        frmMain.btnDefaultXmClick(frmMain);
+        Logger.Add('Settings file created');
     end;
   end;
   frmMain.tbXms.Value := Settings.Xms;

@@ -34,6 +34,7 @@ type
     MaxWorkers : Integer;
     CurrentDownloads : Integer;
     NextDownload : Integer;
+    DownloadList : Array of String;
     Queued : Array of Boolean;
     Constructor Create(var SGrid: TGrid);
     Destructor Destroy;
@@ -48,6 +49,7 @@ type
     procedure onTermination(Sender : TObject);
     procedure Refresh;
     procedure ProcessQueue;
+    procedure CompareInfo;
   private
     Workers: Array of TDownloader;
     procedure GetValue(Sender: TObject; const Col, Row: Integer;
@@ -57,6 +59,9 @@ type
 implementation
 
 uses unitMain;
+
+CONST
+RootURL = 'https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/';
 
 function MD5(const FileName: string): string;
 var
@@ -157,20 +162,9 @@ procedure TUpdateManager.Update(Sender: TObject);
 begin
   CurrentDownloads := 0;
   GenerateInfo;
-    AddDownload
-    ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
-    MinecraftDir + '\HMC1.json');
-      AddDownload
-    ('https://dl.dropboxusercontent.com/u/43879036/Music/dynamite.mp3',
-    MinecraftDir + '\dyn.mp3');
-      AddDownload
-    ('https://dl.dropboxusercontent.com/u/43879036/Music/dynamite.mp3',
-    MinecraftDir + '\dy.mp3');
-        AddDownload
-    ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
-    MinecraftDir + '\HMC1.json');
   ProgramUpdate;
   FilesUpdate;
+  frmMain.btnPlay.enabled := true;
 end;
 
 procedure TUpdateManager.CheckUpdates;
@@ -179,7 +173,7 @@ begin
   CurrentDownloads := 0;
   SetLength(Workers, 0);
   AddDownload
-    ('https://dl.dropboxusercontent.com/u/43879036/Minecraft/HMC/HMC.json',
+    (RootURL + 'HMC.json',
     MinecraftDir + '\HMC.json');
   Workers[0].OnTerminate := Update;
 end;
@@ -204,13 +198,18 @@ begin
   JFiles := SO;
   Info.S['launcherMD5'] := MD5(ParamStr(0));
   Files := TDirectory.GetFiles(MinecraftDir, '*' ,TSearchOption.soAllDirectories);
-  for I := Low(Files) + 1 to High(Files) do    //Trying to skip including .settings file
+  for I := Low(Files) + 1 to High(Files) do    //Trying to skip including .settings file by assuming no other .files exist and . is furthest up
   begin
     JFiles.S[Copy(Files[i], pos('HMC\', Files[i]) + 4, Length(Files[i]))] := MD5(Files[i]);
   end;
+  JFiles := SO(StringReplace(JFiles.AsJSON, '\\', '/', [rfReplaceAll]));
   Info.O['files'] := JFiles;
 end;
 
+procedure TUpdateManager.CompareInfo;
+begin
+  //http://stackoverflow.com/questions/14082886/superobject-extract-all
+end;
 
 Constructor TDownloader.Create(Sender: TObject);
 begin

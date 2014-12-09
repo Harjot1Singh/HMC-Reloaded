@@ -8,7 +8,7 @@ uses
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
   FMX.Objects, FMX.Edit, FMX.ListView.Types, FMX.ListView, FMX.Layouts,
   FMX.ListBox, FMX.Memo, FMX.Ani, System.Rtti, FMX.Grid, IdBaseComponent,
-  IdComponent, IdTCPConnection, IdTCPClient, IdHTTP;
+  IdComponent, IdTCPConnection, IdTCPClient, IdHTTP, IOUtils;
 
 type
   TfrmMain = class(TForm)
@@ -49,7 +49,6 @@ type
   private
     { Private declarations }
   public
-     Logger : TLogger;
      Updater : TUpdateManager;
   end;
 
@@ -95,7 +94,8 @@ end;
 
 procedure TfrmMain.btnForceUpdateClick(Sender: TObject);
 begin
-//Forceupdate
+  TDirectory.Delete(MinecraftDir, True);
+  Updater.CheckUpdates;
 end;
 
 procedure TfrmMain.btnPlayClick(Sender: TObject);
@@ -118,12 +118,11 @@ procedure TfrmMain.FormActivate(Sender: TObject);
 var
   Java : String;
 begin
-  Logger.Add('Setting Minecraft directory to ' + SetMinecraftDir(MinecraftDir));
-  Logger.Add('Minecraft directory ' + CheckCreateDir(MinecraftDir));
-  Logger.Add('Settings ' + LoadSettings);
+  SetMinecraftDir(MinecraftDir);
+  CheckCreateDir(MinecraftDir);
+  LoadSettings;
   SetGridWidth;
-  Java := JavaFound;
-  Logger.Add('Java ' + Java);
+  CheckJava;
   if not (Java = 'found') then btnPlay.Enabled := False;
   if Updater.InternetConnected then Updater.CheckUpdates else Logger.Add('Internet Connection not detected');
   OnActivate := OnActiveBG;
@@ -132,6 +131,7 @@ end;
 procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   SaveSettings;
+  Logger.Destroy;
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
@@ -139,7 +139,8 @@ begin
   Logger := TLogger.Create(gdLog);
   Updater := TUpdateManager.Create(gdDownloads);
   Logger.Add('Initialising Application...');
-  Logger.Add('Layout ' + ChooseLayout(frmMain, imgBG) + ' chosen');
+  ChooseLayout(frmMain, imgBG);
+  Application.OnException := Logger.onError;
 end;
 
 procedure TfrmMain.FormResize(Sender: TObject);

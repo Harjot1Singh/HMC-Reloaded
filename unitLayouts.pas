@@ -2,9 +2,9 @@ unit unitLayouts;
 
 interface
 
-uses FMX.Forms, FMX.Objects, Math, System.Classes, System.Types, System.SysUtils, UnitMain, FMX.Types;
+uses FMX.Forms, FMX.Objects, Math, System.Classes, System.Types, System.SysUtils, UnitMain, FMX.Types, unitLogger;
 
-function ChooseLayout(Form : TForm; BG : TImage):String;
+procedure ChooseLayout(Form : TForm; BG : TImage);
 procedure ToggleLogView;
 procedure ToggleSettingsView;
 procedure SetGridWidth;
@@ -18,7 +18,7 @@ begin
   frmMain.gdDownloads.Columns[1].Width := (frmMain.Width -16) div 2;
 end;
 
-function ChooseLayout(Form : TForm; BG : TImage):String;
+procedure ChooseLayout(Form : TForm; BG : TImage);
 Const
   BGNUMBER = 7;
 var
@@ -31,7 +31,7 @@ begin
   RStream := TResourceStream.Create(MainInstance, 'BG' + IntToStr(LayoutID), RT_RCDATA);
   BG.MultiResBitmap.LoadItemFromStream(RStream, 1.000);
   RStream.Free;
-  Result := IntToStr(LayoutID);
+  Logger.Add('Layout ' + IntToStr(LayoutID) + ' chosen');
 end;
 
 Procedure ToggleLogView;

@@ -2,26 +2,26 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2014/10/18 23:49:31.000.988,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/18 23:49:44.000.227,D:\Projects\HMC-Reloaded\unitLayouts.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/18 23:49:44.000.227,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitLayouts.pas</Transaction>
     <Transaction>2014/10/18 23:50:54.000.424,D:\Projects\HMC-Reloaded\HMCReloaded.dproj=D:\Projects\HMC-Reloaded\HMCReloaded.dproj</Transaction>
-    <Transaction>2014/10/18 23:51:02.000.970,D:\Projects\HMC-Reloaded\unitMain.fmx=D:\Documents\RAD Studio\Projects\HMC Reloaded\unitMain.fmx</Transaction>
-    <Transaction>2014/10/18 23:51:02.000.970,D:\Projects\HMC-Reloaded\unitMain.pas=D:\Documents\RAD Studio\Projects\HMC Reloaded\unitMain.pas</Transaction>
+    <Transaction>2014/10/18 23:51:02.000.970,D:\Documents\RAD Studio\Projects\HMC Reloaded\unitMain.fmx=D:\Projects\HMC-Reloaded\unitMain.fmx</Transaction>
+    <Transaction>2014/10/18 23:51:02.000.970,D:\Documents\RAD Studio\Projects\HMC Reloaded\unitMain.pas=D:\Projects\HMC-Reloaded\unitMain.pas</Transaction>
     <Transaction>2014/10/19 00:09:01.000.984,=D:\Projects\HMC-Reloaded\New1.rc</Transaction>
-    <Transaction>2014/10/19 00:09:27.000.280,D:\Projects\HMC-Reloaded\resources.rc=D:\Projects\HMC-Reloaded\New1.rc</Transaction>
+    <Transaction>2014/10/19 00:09:27.000.280,D:\Projects\HMC-Reloaded\New1.rc=D:\Projects\HMC-Reloaded\resources.rc</Transaction>
     <Transaction>2014/10/24 20:25:06.000.878,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/24 20:25:20.000.449,D:\Projects\HMC-Reloaded\unitSettings.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/24 20:25:20.000.449,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitSettings.pas</Transaction>
     <Transaction>2014/10/24 20:30:05.000.651,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/24 20:30:16.000.169,D:\Projects\HMC-Reloaded\unitMacOS.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/24 20:30:16.000.169,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitMacOS.pas</Transaction>
     <Transaction>2014/10/24 20:30:23.000.893,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/24 20:30:30.000.473,D:\Projects\HMC-Reloaded\unitWindows.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/24 20:30:30.000.473,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitWindows.pas</Transaction>
     <Transaction>2014/10/24 20:51:30.000.076,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/24 20:52:14.000.416,D:\Projects\HMC-Reloaded\unitLaunchCmd.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/24 20:52:14.000.416,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitLaunchCmd.pas</Transaction>
     <Transaction>2014/10/24 20:59:28.000.530,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/24 20:59:33.000.671,D:\Projects\HMC-Reloaded\unitUpdates.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/26 16:12:41.279,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/26 17:28:45.483,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/26 17:29:20.731,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
-    <Transaction>2014/10/26 17:29:26.895,D:\Projects\HMC-Reloaded\unitLogger.pas=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/24 20:59:33.000.671,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitUpdates.pas</Transaction>
+    <Transaction>2014/10/26 16:12:41.000.279,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/26 17:28:45.000.483,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/26 17:29:20.000.731,=D:\Projects\HMC-Reloaded\Unit1.pas</Transaction>
+    <Transaction>2014/10/26 17:29:26.000.895,D:\Projects\HMC-Reloaded\Unit1.pas=D:\Projects\HMC-Reloaded\unitLogger.pas</Transaction>
   </Transactions>
 	<ProjectSortOrder AutoSort="0" SortType="0">
     <File Path="unitMain.pas"/>
